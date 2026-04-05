@@ -206,10 +206,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 <div class="footer">IQRA Public School and College Dara Pezu · Founded 1999 · Parent Portal — Live Data<br>For queries: 0347-1575196 / 0370-1575196</div>
 
-<script>
-// ══ FIREBASE CONFIG ══════════════════════════════════════════════
-// Must match the same config used in school-exam-tracker.html
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
 const firebaseConfig = {
+ const firebaseConfig = {
   apiKey: "AIzaSyAKcImjR8zY4RG0WJqgcF2bfqsP1I4lrOY",
   authDomain: "iqraschoolportal.firebaseapp.com",
    databaseURL: "https://iqraschoolportal-default-rtdb.firebaseio.com/",
@@ -218,6 +221,12 @@ const firebaseConfig = {
   messagingSenderId: "259890671849",
   appId: "1:259890671849:web:52bcb17f8c4041f1b0c078"
 };
+
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+</script>
 // ════════════════════════════════════════════════════════════════
 
 const SUBS={1:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],2:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],3:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],4:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],5:['English','Urdu','Maths','Islamiat','Science','Social Studies','Grammar'],6:['English','Urdu','Maths','Islamiat','Science','History','Geography','Grammar'],7:['English','Urdu','Maths','Islamiat','Science','History','Geography','Grammar'],8:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology'],9:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology'],10:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology']};
