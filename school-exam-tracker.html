@@ -129,6 +129,47 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .wt-seg{display:flex;border:1px solid var(--border);border-radius:9px;overflow:hidden;margin-bottom:14px;width:fit-content;}
 .wt-seg-btn{padding:7px 18px;font-size:12px;font-weight:600;cursor:pointer;border:none;background:var(--surface);color:var(--muted);font-family:inherit;transition:all .15s;}
 .wt-seg-btn.active{background:var(--gold);color:#000;}
+
+/* ── Subject term progress bar ── */
+.subj-prog-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+.subj-prog-head{display:flex;align-items:center;justify-content:space-between;padding:8px 13px;background:var(--surface2);border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.5px;}
+.subj-prog-body{padding:8px 13px;display:flex;flex-direction:column;gap:7px;}
+.sprow{display:flex;align-items:center;gap:10px;}
+.sprow-lbl{font-size:10px;color:var(--muted);width:55px;flex-shrink:0;}
+.spbar-wrap{flex:1;height:8px;background:var(--border);border-radius:100px;overflow:hidden;}
+.spbar{height:100%;border-radius:100px;transition:width .4s;}
+.sprow-pct{font-size:11px;font-weight:700;width:32px;text-align:right;}
+
+/* ── Student results table per class ── */
+.stu-section{margin-top:16px;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.stu-head{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:var(--surface2);border-bottom:1px solid var(--border);}
+.stu-htitle{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);}
+.stu-addrow{display:flex;gap:6px;padding:9px 12px;border-top:1px solid var(--border);flex-wrap:wrap;align-items:flex-end;}
+.stu-tbl{width:100%;border-collapse:collapse;}
+.stu-tbl th{padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);border-bottom:1px solid var(--border);background:var(--surface2);}
+.stu-tbl td{padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.stu-tbl tr:last-child td{border-bottom:none;}
+.stu-tbl tr:hover td{background:var(--surface2);}
+.pct-cell{font-weight:700;}
+
+/* ── Manual save float ── */
+.save-float{position:fixed;bottom:20px;right:20px;z-index:1000;display:flex;gap:8px;align-items:center;}
+.save-btn{padding:9px 20px;border-radius:8px;border:none;background:var(--gold);color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;box-shadow:0 4px 14px rgba(0,0,0,.3);}
+.save-btn:hover{background:#f59e0b;transform:translateY(-1px);}
+.save-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.unsaved-dot{width:9px;height:9px;border-radius:50%;background:#ef4444;display:none;box-shadow:0 0 0 2px rgba(239,68,68,.3);}
+.unsaved-dot.show{display:inline-block;}
+
+/* ── Exam date editor ── */
+.date-editor{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:16px;}
+.date-editor-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:10px;}
+.date-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:560px){.date-grid{grid-template-columns:1fr;}}
+.date-field{display:flex;flex-direction:column;gap:4px;}
+.date-field label{font-size:10px;color:var(--muted);}
+.date-field input[type=date],.date-field input[type=text]{padding:5px 8px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:12px;font-family:inherit;}
+.date-field input:focus{outline:none;border-color:var(--gold);}
+.sec-hdr{display:flex;align-items:center;gap:8px;margin:12px 0 8px;}.sec-hdr-line{flex:1;height:1px;background:var(--border);}.sec-hdr-txt{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);font-weight:600;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -147,7 +188,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <button class="ntab" onclick="switchSec('planner')">📅 Planner</button>
       <button class="ntab" onclick="switchSec('boards')">🏆 Boards</button>
       <button class="ntab" onclick="switchSec('weekly')">📝 Weekly</button>
-      <a class="ntab parent-link" href="index.html" target="_blank">👨‍👩‍👧 Parent Portal ↗</a>
+      <a class="ntab parent-link" href="parent-portal.html" target="_blank">👨‍👩‍👧 Parent Portal ↗</a>
     </div>
   </div>
 </div>
@@ -167,6 +208,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
   <!-- MARKS -->
   <div class="section active" id="sec-marks">
+    <div class="date-editor" id="dateEditor"></div>
     <div class="cdgrid" id="countdowns"></div>
     <div class="ctabs" id="mtabs"></div>
     <div id="mpanels"></div>
@@ -202,28 +244,21 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 </div>
 
 <div class="save-ind" id="saveInd">☁️ Saved to Cloud</div>
+<div class="save-float"><span class="unsaved-dot" id="unsavedDot"></span><button class="save-btn" id="mainSaveBtn" onclick="saveAll()">💾 Save All Changes</button></div>
 
-<script type="module">
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-
-const firebaseConfig = {
- const firebaseConfig = {
-  apiKey: "AIzaSyAKcImjR8zY4RG0WJqgcF2bfqsP1I4lrOY",
-  authDomain: "iqraschoolportal.firebaseapp.com",
-   databaseURL: "https://iqraschoolportal-default-rtdb.firebaseio.com/",
-  projectId: "iqraschoolportal",
-  storageBucket: "iqraschoolportal.firebasestorage.app",
-  messagingSenderId: "259890671849",
-  appId: "1:259890671849:web:52bcb17f8c4041f1b0c078"
+<script>
+// ══ FIREBASE CONFIG ══════════════════════════════════════════════
+// Step 1: Go to https://console.firebase.google.com
+// Step 2: Create project → Add web app → Copy config below
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBiDDwQY5VPHLEXp2h4wO79potOs9L9A54",
+  authDomain: "iqra-parents.firebaseapp.com",
+  databaseURL: "https://iqra-parents-default-rtdb.firebaseio.com",
+  projectId: "iqra-parents",
+  storageBucket: "iqra-parents.firebasestorage.app",
+  messagingSenderId: "1038703318060",
+  appId: "1:1038703318060:web:1d93561f010de9de006d89"
 };
-
-
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-</script>
 // ═══════════════════════════════════════════════════════════════
 
 const SUBS={1:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],2:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],3:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],4:['English','Maths','Urdu','Islamiat','General Knowledge','Grammar'],5:['English','Urdu','Maths','Islamiat','Science','Social Studies','Grammar'],6:['English','Urdu','Maths','Islamiat','Science','History','Geography','Grammar'],7:['English','Urdu','Maths','Islamiat','Science','History','Geography','Grammar'],8:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology'],9:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology'],10:['English','Urdu','Maths','Islamiat','Pak Study','MQH','Physics','Chemistry','Biology']};
@@ -366,9 +401,11 @@ function renderMPanels() {
       rowEl.appendChild(row);
     });
     document.getElementById('nt-'+cls).addEventListener('input', function() {
-      saveToCloud('marks/notes/c'+cls, this.value);
+      markUnsaved();
     });
     updM(cls);
+    renderSubjProgress(cls, panel);
+    renderStudentSection(cls, panel);
   }
 }
 
@@ -378,7 +415,7 @@ function onM(inp) {
   const sd = getNestedValue(DB, ['marks','scores','c'+c, s]) || {};
   if (v==='') delete sd[t]; else sd[t] = parseFloat(v);
   setNestedValue(DB, ['marks','scores','c'+c, s], sd);
-  saveToCloud('marks/scores/c'+c+'/'+s.replace(/[.#$/\[\]]/g,'_'), sd);
+  markUnsaved();
   updM(parseInt(c));
 }
 
@@ -559,7 +596,7 @@ function updBrd(cls,i,field,val) {
   const students = getNestedValue(DB,['boards','c'+cls]) || [];
   if(students[i]) students[i][field]=val;
   setNestedValue(DB,['boards','c'+cls],students);
-  saveToCloud('boards/c'+cls, students);
+  markUnsaved();
 }
 function delBrd(cls,i) {
   const students = getNestedValue(DB,['boards','c'+cls]) || [];
@@ -662,7 +699,7 @@ function updWkS(sec,ti,si,field,val) {
   const tests = getNestedValue(DB,['weekly',sec]) || [];
   if(tests[ti]&&tests[ti].students&&tests[ti].students[si]) tests[ti].students[si][field]=val;
   setNestedValue(DB,['weekly',sec],tests);
-  saveToCloud('weekly/'+sec, tests);
+  markUnsaved();
 }
 function delWkS(sec,ti,si) {
   const tests = getNestedValue(DB,['weekly',sec]) || [];
@@ -672,8 +709,261 @@ function delWkS(sec,ti,si) {
   renderWkPanel(sec);
 }
 
+
+// ── Unsaved tracking ─────────────────────────────────────────────
+let _unsaved = false;
+function markUnsaved() {
+  _unsaved = true;
+  document.getElementById('unsavedDot').classList.add('show');
+}
+function clearUnsaved() {
+  _unsaved = false;
+  document.getElementById('unsavedDot').classList.remove('show');
+  const btn = document.getElementById('mainSaveBtn');
+  btn.textContent = '✅ Saved!';
+  setTimeout(() => { btn.textContent = '💾 Save All Changes'; btn.disabled = false; }, 2000);
+}
+
+// ── Master Save All ───────────────────────────────────────────────
+function saveAll() {
+  const btn = document.getElementById('mainSaveBtn');
+  btn.disabled = true; btn.textContent = '⏳ Saving…';
+
+  for (let cls = 1; cls <= 10; cls++) {
+    const scores = getNestedValue(DB, ['marks','scores','c'+cls]) || {};
+    Object.entries(scores).forEach(([sub, sd]) => {
+      saveToCloud('marks/scores/c'+cls+'/'+sub.replace(/[.#$/\[\]]/g,'_'), sd);
+    });
+    const noteEl = document.getElementById('nt-'+cls);
+    if (noteEl) saveToCloud('marks/notes/c'+cls, noteEl.value);
+    const stus = getNestedValue(DB, ['students','c'+cls]) || [];
+    if (stus.length) saveToCloud('students/c'+cls, stus);
+  }
+
+  ['9','10','11','12'].forEach(cls => {
+    const students = getNestedValue(DB, ['boards','c'+cls]) || [];
+    saveToCloud('boards/c'+cls, students);
+  });
+
+  ['matric','fsc'].forEach(sec => {
+    const tests = getNestedValue(DB, ['weekly',sec]) || [];
+    if (tests.length) saveToCloud('weekly/'+sec, tests);
+  });
+
+  const termDates = getNestedValue(DB, ['termDates']) || {};
+  saveToCloud('termDates', termDates);
+
+  setTimeout(() => clearUnsaved(), 800);
+}
+
+// ── Term Date Editor ─────────────────────────────────────────────
+function renderDateEditor() {
+  const el = document.getElementById('dateEditor');
+  if (!el) return;
+  const termDates = getNestedValue(DB, ['termDates']) || {};
+  const terms = TERMS.map(t => ({
+    ...t,
+    exam: (termDates[t.id] && termDates[t.id].exam) || t.exam,
+    syllabus: (termDates[t.id] && termDates[t.id].syllabus) || t.syllabus,
+    label: (termDates[t.id] && termDates[t.id].label) || t.label,
+  }));
+  const TC2 = {t1:'#f97316', t2:'#3b82f6', t3:'#22c55e'};
+  el.innerHTML = `<div class="date-editor-title">📅 Exam Dates &amp; Term Labels <span style="font-size:10px;font-weight:400;color:var(--muted);margin-left:4px;">(edit then Save All)</span></div>
+  <div class="date-grid">
+    ${terms.map(t => `
+    <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;border:1px solid var(--border);border-top:3px solid ${TC2[t.id]};">
+      <div style="font-size:11px;font-weight:700;color:${TC2[t.id]};margin-bottom:8px;">${esc(t.label)}</div>
+      <div class="date-field" style="margin-bottom:6px;">
+        <label>Term Name</label>
+        <input type="text" value="${esc(t.label)}" oninput="updTermDate('${t.id}','label',this.value)" placeholder="e.g. Term 1">
+      </div>
+      <div class="date-field" style="margin-bottom:6px;">
+        <label>Exam Date</label>
+        <input type="date" value="${t.exam}" oninput="updTermDate('${t.id}','exam',this.value)">
+      </div>
+      <div class="date-field">
+        <label>Syllabus Deadline</label>
+        <input type="date" value="${t.syllabus}" oninput="updTermDate('${t.id}','syllabus',this.value)">
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function updTermDate(termId, field, val) {
+  const termDates = getNestedValue(DB, ['termDates']) || {};
+  if (!termDates[termId]) termDates[termId] = {};
+  termDates[termId][field] = val;
+  setNestedValue(DB, ['termDates'], termDates);
+  const t = TERMS.find(x => x.id === termId);
+  if (t) t[field] = val;
+  if (field === 'label') TLbl[termId] = val;
+  renderCD();
+  markUnsaved();
+}
+
+// ── Subject Syllabus Progress per Term (from Planner) ────────────
+function renderSubjProgress(cls, container) {
+  const subs = SUBS[cls];
+  const TC2 = {t1:'#f97316', t2:'#3b82f6', t3:'#22c55e'};
+
+  // Group months by term
+  const termMonths = {t1:[], t2:[], t3:[]};
+  MONTHS.forEach(m => termMonths[m.term].push(m));
+
+  const card = document.createElement('div');
+  card.style.cssText = 'margin-top:14px;';
+  card.innerHTML = `<div class="sec-hdr" style="margin-bottom:10px;"><div class="sec-hdr-line"></div><div class="sec-hdr-txt">📚 Subject Syllabus Progress by Term</div><div class="sec-hdr-line"></div></div>`;
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;';
+
+  subs.forEach(sub => {
+    const subKey = sub.replace(/\s+/g, '_');
+    const pc = document.createElement('div');
+    pc.className = 'subj-prog-card';
+    let html = `<div class="subj-prog-head">${esc(sub)}</div><div class="subj-prog-body">`;
+    TERMS.forEach(t => {
+      const months = termMonths[t.id];
+      let tot = 0, dn = 0;
+      months.forEach(m => {
+        const topics = getNestedValue(DB, ['planner', m.key, 'c'+cls, subKey]) || [];
+        tot += topics.length;
+        dn += topics.filter(x => x.done).length;
+      });
+      const pctVal = tot ? Math.round(dn/tot*100) : 0;
+      html += `<div class="sprow">
+        <div class="sprow-lbl" style="color:${TC2[t.id]}">${TLbl[t.id]}</div>
+        <div class="spbar-wrap"><div class="spbar" style="width:${pctVal}%;background:${TC2[t.id]}"></div></div>
+        <div class="sprow-pct" style="color:${TC2[t.id]}">${pctVal}%</div>
+      </div>`;
+    });
+    html += `</div>`;
+    pc.innerHTML = html;
+    grid.appendChild(pc);
+  });
+
+  card.appendChild(grid);
+  container.appendChild(card);
+}
+
+// ── Student Results Per Class (term-wise marks + %) ───────────────
+function renderStudentSection(cls, container) {
+  const sec = document.createElement('div');
+  sec.className = 'stu-section'; sec.id = 'stu-sec-'+cls;
+  _buildStudentSection(cls, sec);
+  container.appendChild(sec);
+}
+
+function _buildStudentSection(cls, sec) {
+  const students = getNestedValue(DB, ['students','c'+cls]) || [];
+  const termLabels = TERMS.map(t => TLbl[t.id]);
+
+  const rows = students.map((s, i) => {
+    const t1 = parseFloat(s.t1) || 0;
+    const t2 = parseFloat(s.t2) || 0;
+    const t3 = parseFloat(s.t3) || 0;
+    const total = parseFloat(s.total) || 300;
+    const obtained = t1 + t2 + t3;
+    const pctVal = total > 0 ? ((obtained / total) * 100).toFixed(1) : '—';
+    const pctNum = total > 0 ? parseFloat(pctVal) : null;
+    const col = pctNum !== null ? (pctNum>=75?'#22c55e':pctNum>=60?'#fbbf24':pctNum>=45?'#f97316':'#ef4444') : '#8b949e';
+    return `<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td><input class="ainp2" value="${esc(s.name)}" oninput="updStu(${cls},${i},'name',this.value)" style="min-width:110px;width:100%;"></td>
+      <td><input class="ainp2" value="${esc(s.father||'')}" oninput="updStu(${cls},${i},'father',this.value)" style="min-width:100px;width:100%;"></td>
+      <td><input class="ainp2" type="number" value="${s.t1||''}" oninput="updStu(${cls},${i},'t1',this.value)" style="width:60px;" placeholder="—"></td>
+      <td><input class="ainp2" type="number" value="${s.t2||''}" oninput="updStu(${cls},${i},'t2',this.value)" style="width:60px;" placeholder="—"></td>
+      <td><input class="ainp2" type="number" value="${s.t3||''}" oninput="updStu(${cls},${i},'t3',this.value)" style="width:60px;" placeholder="—"></td>
+      <td><input class="ainp2" type="number" value="${s.total||300}" oninput="updStu(${cls},${i},'total',this.value)" style="width:60px;"></td>
+      <td class="pct-cell" id="stu-pct-${cls}-${i}" style="color:${col}">${pctVal !== '—' ? pctVal+'%' : '—'}</td>
+      <td><button onclick="delStu(${cls},${i})" style="padding:2px 8px;border-radius:5px;border:none;background:rgba(239,68,68,.12);color:#ef4444;cursor:pointer;font-size:11px;">✕</button></td>
+    </tr>`;
+  }).join('');
+
+  sec.innerHTML = `
+    <div class="stu-head">
+      <div class="stu-htitle">👩‍🎓 Class ${cls} — Student Results (Term-wise)</div>
+      <span style="font-size:11px;color:var(--muted);">${students.length} student${students.length!==1?'s':''}</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="stu-tbl">
+        <thead><tr>
+          <th>#</th><th>Student Name</th><th>Father Name</th>
+          <th>${termLabels[0]}</th><th>${termLabels[1]}</th><th>${termLabels[2]}</th>
+          <th>Total Marks</th><th>%</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="stu-addrow">
+      <input class="ainp2" id="sn-${cls}" placeholder="Student Name" style="flex:2;min-width:110px;">
+      <input class="ainp2" id="sf-${cls}" placeholder="Father Name" style="flex:2;min-width:110px;">
+      <input class="ainp2" id="st1-${cls}" type="number" placeholder="${termLabels[0]}" style="width:75px;">
+      <input class="ainp2" id="st2-${cls}" type="number" placeholder="${termLabels[1]}" style="width:75px;">
+      <input class="ainp2" id="st3-${cls}" type="number" placeholder="${termLabels[2]}" style="width:75px;">
+      <input class="ainp2" id="stotal-${cls}" type="number" placeholder="Total" value="300" style="width:70px;">
+      <button class="addbtn2" onclick="addStu(${cls})">+ Add Student</button>
+    </div>`;
+}
+
+function addStu(cls) {
+  const name = document.getElementById('sn-'+cls).value.trim();
+  if (!name) return;
+  const father = document.getElementById('sf-'+cls).value.trim();
+  const t1 = parseFloat(document.getElementById('st1-'+cls).value) || 0;
+  const t2 = parseFloat(document.getElementById('st2-'+cls).value) || 0;
+  const t3 = parseFloat(document.getElementById('st3-'+cls).value) || 0;
+  const total = parseFloat(document.getElementById('stotal-'+cls).value) || 300;
+  const students = getNestedValue(DB, ['students','c'+cls]) || [];
+  students.push({name, father, t1, t2, t3, total});
+  setNestedValue(DB, ['students','c'+cls], students);
+  markUnsaved();
+  ['sn-','sf-','st1-','st2-','st3-'].forEach(p => document.getElementById(p+cls).value = '');
+  const sec = document.getElementById('stu-sec-'+cls);
+  if (sec) { sec.innerHTML = ''; _buildStudentSection(cls, sec); }
+}
+
+function updStu(cls, i, field, val) {
+  const students = getNestedValue(DB, ['students','c'+cls]) || [];
+  if (!students[i]) return;
+  if (['t1','t2','t3','total'].includes(field)) students[i][field] = parseFloat(val) || 0;
+  else students[i][field] = val;
+  setNestedValue(DB, ['students','c'+cls], students);
+  markUnsaved();
+  // Recalc % cell
+  const s = students[i];
+  const tot = parseFloat(s.total) || 300;
+  const obt = (parseFloat(s.t1)||0) + (parseFloat(s.t2)||0) + (parseFloat(s.t3)||0);
+  const pctV = tot > 0 ? ((obt/tot)*100).toFixed(1) : null;
+  const col = pctV ? (parseFloat(pctV)>=75?'#22c55e':parseFloat(pctV)>=60?'#fbbf24':parseFloat(pctV)>=45?'#f97316':'#ef4444') : '#8b949e';
+  const cell = document.getElementById(`stu-pct-${cls}-${i}`);
+  if (cell) { cell.textContent = pctV ? pctV+'%' : '—'; cell.style.color = col; }
+}
+
+function delStu(cls, i) {
+  const students = getNestedValue(DB, ['students','c'+cls]) || [];
+  students.splice(i, 1);
+  setNestedValue(DB, ['students','c'+cls], students);
+  markUnsaved();
+  const sec = document.getElementById('stu-sec-'+cls);
+  if (sec) { sec.innerHTML = ''; _buildStudentSection(cls, sec); }
+}
+
+// ── section header helper ─────────────────────────────────────────
+HTMLElement.prototype.appendChild_stu = HTMLElement.prototype.appendChild;
+
 // ══ RENDER ALL (called after Firebase data loads) ══════════════
 function renderAll() {
+  // Apply saved term dates
+  const termDates = getNestedValue(DB, ['termDates']) || {};
+  TERMS.forEach(t => {
+    if (termDates[t.id]) {
+      if (termDates[t.id].exam) t.exam = termDates[t.id].exam;
+      if (termDates[t.id].syllabus) t.syllabus = termDates[t.id].syllabus;
+      if (termDates[t.id].label) { t.label = termDates[t.id].label; TLbl[t.id] = termDates[t.id].label; }
+    }
+  });
+  renderDateEditor();
   renderCD();
   renderMTabs();
   renderMPanels();
